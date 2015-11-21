@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Avon DSS</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<link rel="stylesheet" href="http://www.bankrate.com/system/story/embed.css" type="text/css"/>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;sensor=false"></script><script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1','packages':['corechart']}]}"></script>
+    
+	<style>
+	th, td {
+	    vertical-align:middle;
+	    padding-left: 0px;
+	    padding-right: 10px;
+    	    padding-top: 5px;
+	    padding-bottom: 5px;
+	}
+	#map-canvas {
+            margin: 0;
+            padding: 0;
+            height: 325px;
+            width: 500px;
+	    border:1px solid #0b0;
+        }
+	.rcorners2 {
+	    border-radius: 25px;
+	    border: 2px solid #000000;
+	    padding: 20px; 
+	    width: 200px;
+	    height: 150px;    
+	}
+	</style>
+		
+    <script>
+    //global vars
+    var map;
+    var geocoder;
+
+    <!-- initialize the Google map -->
+    function initialize() {
+        var mapOptions = {
+            zoom: 16,
+            //mapTypeId: google.maps.MapTypeId.ROADMAP
+	    //mapTypeId: google.maps.MapTypeId.SATELLITE
+	    mapTypeId: google.maps.MapTypeId.HYBRID
+        };
+        
+	geocoder = new google.maps.Geocoder();
+        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+    }
+    
+    <!-- call initialize when window loads -->
+    google.maps.event.addDomListener(window, 'load', initialize);
+
+
+    function codeAddress() {
+    var address = document.getElementById("address").value;
+    geocoder.geocode( { 'address': address}, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        map.setCenter(results[0].geometry.location);
+        var marker = new google.maps.Marker({
+            map: map,
+            position: results[0].geometry.location
+        });
+      } else {
+        alert("Geocode was not successful for the following reason: " + status);
+      }
+    });
+    }
+
+</script>
+		
+		
+    </head>
+
+    <body>
+
+<script>
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+function calculateSalesPrice() {
+//log(Sale Price) = 5.632443237 + (0.001505996 * Number of beds) + (-0.002627747 * Number of bathrooms) + (0.000185195 * Square Feet) + (-0.051299057 * Lot Size) + (-0.0000346776330390008 * Distance from Beach)
+
+beds = document.getElementById("beds").value;
+baths = document.getElementById("baths").value;
+squarefeet = document.getElementById("squarefeet").value;
+lotsize = document.getElementById("lotsize").value;
+distance = document.getElementById("distance").value;
+
+result = 5.63244323733079 + (0.00150599630098233 * beds) + (-0.00262774667143455 * baths) + (0.000185195492898666 *  squarefeet) + (0.0512990572966215 * lotsize) + (-0.0000346776330390008 * distance);
+result = Math.pow(10,result);
+document.getElementById("result").innerHTML = "$" + numberWithCommas(result.toFixed(2));
+return;
+}
+function calculateMortgage() {
+    // Set variables from form data
+    var loanprincipal = document.getElementById("loanamount").value;
+    var months = document.getElementById("term").value * 12;
+    var interest = document.getElementById("rate").value / 1200;
+    
+    // Calculate mortgage payment and display result
+    document.getElementById('monthlypayment').innerHTML = '$' + numberWithCommas((loanprincipal * interest / (1 - (Math.pow(1/(1 + interest), months)))).toFixed(2));
+}
+function clearMortgage() {
+    document.getElementById("monthlypayment").innerHTML = "";
+    document.getElementById("loanamount").value = "";
+    document.getElementById("term").value = "";
+    document.getElementById("rate").value = "";
+}
+</script>
+
+
+
+
+<div class="container">
+  <h2>Avon Beach House DSS</h2>
+  <p>A decision support system (DSS) to find the right beach house in Avon, New Jersey</p><br>
+  <ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
+    <li><a data-toggle="tab" href="#dashboard">Dashboard</a></li>
+    <li><a data-toggle="tab" href="#menu1">Models</a></li>
+    <li><a data-toggle="tab" href="#menu2">Map</a></li>
+    <li><a data-toggle="tab" href="#menu3">Financing</a></li>
+    <li><a data-toggle="tab" href="#menu4">Charts</a></li>
+  </ul>
+
+  
+  <div class="tab-content">
+    <div id="home" class="tab-pane fade in active">
+      <h3>Welcome!</h3>
+      <p style="font-size:10px;font-style: italic;text-align:right; margin-right: 11px; " >Photo Credit: <a href="http://www.realtor.com/" target="_blank">Realtor.com</a></p>
+      <img src="https://farm6.staticflickr.com/5768/22675160915_0f4c32a6e0_n.jpg" width="320" height="212" alt="[house picture]" style="float:right;border:1px solid black;margin-right: 10px;margin-bottom: 10px;">
+      <p>Finding the right beach house in Avon-by-the-Sea, also known as Avon, New Jersey is a daunting task. This DSS considers factors such as budget, price, and location to help buyers identify potential homes.</p>
+      
+      <p style="font-size:10px;font-style: italic; " >Photo Credit: Edwin Torres</p>
+      <img src="https://farm1.staticflickr.com/643/22664937421_89cd246745_n.jpg" width="320" height="212" alt="[buyer picture]" style="float:left;border:1px solid black;margin-right: 10px">
+	<p style="font-weight: bold">Dashboard</p>
+	<p>This is where you can execute decision support models to help you find a beach house. The Dashboard tab is the primary input screen of this DSS.</p>
+	<p style="font-weight: bold">Models</p>
+	<p>Use this tab to select an active model for the Dashboard. This tab describes the logic behind the models. Certain models, such as the Multiple Regression (Sale Price Predictor) Model, may be refreshed and recalculated with new data.</p>
+	<p style="font-weight: bold">Map</p>
+	<p>This is where you can enter a home address and view it in Google Maps. The map lets you zoom, scroll, change views, and more.</p>
+	
+	
+	
+    </div>
+        <div id="dashboard" class="tab-pane fade">
+      <h3>Dashboard</h3>
+      <p style="display:inline" >Selected model: </p><p style="display:inline;font-style: italic;" >Multiple Regression (Sale Price Predictor)&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="This is the active model for the Dashboard. To change the active model, go to the Models tab and select a new model." ></span></p>
+      <br><br><br>
+      <p style="display:inline;font-size:30px;" >Predicted sale price: &nbsp;&nbsp;</p><p style="display:inline;font-size:30px;" id="result" >?</p><br><br>
+      
+      <table>
+	<tr>
+	    <td style="text-align:left">
+		Bedrooms:
+	    </td>
+	    <td>
+		<select class="input-small" id="beds"  >
+		<option>1</option>
+		<option>2</option>
+		<option>3</option>
+		<option selected >4</option>
+		<option>5</option>
+		<option>6</option>
+		<option>7</option>
+		<option>8</option>
+		<option>9</option>
+		<option>10</option>
+		<option>12</option>
+		<option>13</option>
+		<option>14</option>
+		<option>15</option>		
+		</select>
+	    </td>
+	    <td>
+		&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="Enter the number of bedrooms." ></span>
+	    </td>
+	</tr>
+	<tr>
+	    <td style="text-align:left">
+		Bathrooms:
+	    </td>
+	    <td>
+		<select class="input-small" id="baths"  >
+		<option>1</option>
+		<option selected >2</option>
+		<option>3</option>
+		<option>4</option>
+		<option>5</option>
+		<option>6</option>
+		<option>7</option>
+		<option>8</option>
+		<option>9</option>
+		<option>10</option>		
+		</select>
+	    </td>
+	    <td>
+		&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="Enter the number of bathrooms. Use 0.5 for a half bath." ></span>
+	    </td>	    
+	</tr>
+	<tr>
+	    <td style="text-align:left">
+		Square feet:
+	    </td>
+	    <td>
+		<input type="number" min="100" max="50000" step="100" id="squarefeet" value="1880" style="width:100px;" >
+	    </td>
+	    <td>
+		&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="Enter the square footage of the house." ></span>
+	    </td>	    
+	</tr>
+	<tr>
+	    <td style="text-align:left">
+		Lot size (acres):
+	    </td>
+	    <td>
+		<input type="number" min="0" max="10" step="0.1" id="lotsize" value="0.25" style="width:100px;" >
+	    </td>
+	    <td>
+		&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="Enter lot size in increments of 1/10." ></span>
+	    </td>	    
+	</tr>
+	<tr>
+	    <td style="text-align:left">
+		Distance from beach (feet):
+	    </td>
+	    <td>
+		<input type="number" min="0" max="100000" step="1" value="1100" id="distance" style="width:100px;" >
+	    </td>
+	    <td>
+		&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="Enter the distance from the beach in feet." ></span>
+	    </td>
+	</tr>
+	<tr>
+	    <td colspan="3">
+		<button onclick="calculateSalesPrice()" >Calculate</button>
+	    </td>
+		
+	</tr>
+      </table>
+	
+
+      
+      
+      
+      
+    </div>
+	
+    <div id="menu1" class="tab-pane fade">
+      <h3>Models</h3>
+      <p>The Avon DSS uses multiple models to convert data into useful information. This page describes these models. Please select the active model below.</p>
+      
+      <p style="display:inline" >Select the active model:</p>
+	<select>
+	<option value="Multiple Regression" selected>Multiple Regression</option>
+	</select>
+      &nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="Select the active model for the Dashboard." ></span>
+
+            <hr>
+    
+      <h4>Multiple Regression (Sale Price Predictor) Model</h4>
+      <p>The multiple regression (sale price predictor) model predicts the sale price of homes in Avon, New Jersey. Input data comes from <a href="http://www.zillow.com/homes/Avon-by-the-Sea-NJ_rb/" target="_blank">Zillow</a>. Sale price is the dependent variable. Number of beds, number of bathrooms, square feet, size of lot, and distance from the beach are the independent variables. Performing a multiple regression analysis (in Microsoft Excel) with this data produces the following equation:</p><br>
+      <p style="font-family:courier;color:blue">log(Sale Price) = 5.632443237 + (0.001505996 * Number of beds) + (-0.002627747 * Number of bathrooms) + (0.000185195 * Square Feet) + (-0.051299057 * Lot Size) + (-0.0000346776330390008 * Distance from Beach)
+      <br><br>
+	R Square: 0.854942815
+	Adjusted R Square: 0.824722568
+      </p><br>
+      <p>Note: Using the log of sale price is a log transformation. This value is converted to an actual price for the user.</p>
+      <p>Input data:&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="The input data is in comma-separated value (CSV) format." ></span></p>
+      <table>
+	<tr><td>
+<textarea rows="4" cols="110" readonly >
+Address,Beds,Baths,Home Sqft,Lot (acres),Distance From Shore (feet),log(Sale Price),log(Sale Price)
+"114 Sylvania Ave,Avon By The Sea, NJ 07717",7,4.5,3608,0.16,928,$6.27784,"$1,896,000"
+"119 Lakeside Ave, Avon By The Sea, NJ 07717",2,1.5,945,0.08,1102.62,$5.77815,"$600,000"
+"120 Sylvania Ave, Avon By The Sea, NJ 07717",4,3.5,3264,0.16,1053,$6.23930,"$1,735,000"
+"124 Sylvania Ave, Avon By The Sea, NJ 07717",5,4.5,3476,0.16,1153,$6.25527,"$1,800,000"
+"128 Norwood Ave, Avon By The Sea, NJ 07717",5,2,1768,0.18,1147.73,$5.93450,"$860,000"
+"131 Garfield Ave, Avon By The Sea, NJ 07717",6,3,2496,0.16,1147.79,$6.08991,"$1,230,000"
+"135 Lincoln Ave, Avon By The Sea, NJ 07717",6,3.5,3900,1.00,1201.96,$6.22401,"$1,675,000"
+"18 Sylvania Ave, Avon By The Sea, NJ 07717",5,4.5,3706,0.16,318,$6.38917,"$2,450,000"
+"204 1st Ave, Avon By The Sea, NJ 07717",6,3.5,3346,0.21,693.54,$6.02531,"$1,060,000"
+"217 Norwood Ave, Avon By The Sea, NJ 07717",5,4,4150,0.16,1628.28,$6.20952,"$1,620,000"
+"221 Norwood Ave, Avon By The Sea, NJ 07717",4,3,1879,0.16,1677.81,$5.89625,"$787,500"
+"226 Lincoln Ave, Avon By The Sea, NJ 07717",4,2,1794,0.16,1632.85,$5.92169,"$835,000"
+"235 Lincoln Ave, Avon By The Sea, NJ 07717",6,2.5,2039,0.10,1778.54,$5.97772,"$950,000"
+"302 Sylvania Ave, Avon By The Sea, NJ 07717",3,1.5,1864,0.11,1959,$5.87361,"$747,500"
+"305 Lincoln Ave, Avon By The Sea, NJ 07717",4,2,2160,0.13,1954.35,$5.94939,"$890,000"
+"308 Sylvania Ave, Avon By The Sea, NJ 07717",4,2.5,1900,0.08,2045,$5.97772,"$950,000"
+"32 Lincoln Ave, Avon By The Sea, NJ 07717",6,4,2782,0.24,510.25,$6.19033,"$1,550,000"
+"337 Norwood Ave, Avon By The Sea, NJ 07717",3,1,1198,0.06,2453.48,$5.74429,"$555,000"
+"339 Lincoln Ave, Avon By The Sea, NJ 07717",5,2.5,2552,0.16,2357.16,$6.15381,"$1,425,000"
+"38 Garfield Ave, Avon By The Sea, NJ 07717",5,4.5,4904,0.16,644.2,$6.40654,"$2,550,000"
+"403 Ocean Ave, Avon By The Sea, NJ 07717",4,3,3511,0.16,173.65,$6.41497,"$2,600,000"
+"406 Washington Ave, Avon By The Sea, NJ 07717",4,2,1929,0.16,2691.34,$5.99520,"$989,000"
+"41 Norwood Ave, Avon By The Sea, NJ 07717",6,1.5,2308,0.17,622.06,$5.98900,"$975,000"
+"415 Sylvania Ave, Avon By The Sea, NJ 07717",4,3,2100,0.13,2757,$5.84510,"$700,000"
+"419 Woodland Ave, Avon By The Sea, NJ 07717",2,1,1225,0.16,2792.34,$5.93665,"$864,275"
+"434 Jefferson Ave,Avon By The Sea, NJ 07717",2,1,1171,0.16,3007.54,$5.69897,"$500,000"
+"612 4th Ave, Avon By The Sea, NJ 07717",2,1,780,0.04,2493.97,$5.67117,"$469,000"
+"615 3rd Ave, Avon By The Sea, NJ 07717",4,1.5,1131,0.05,2000.38,$5.67669,"$475,000"
+"615 5th Ave, Avon By The Sea, NJ 07717",4,4,2140,0.11,3221.88,$5.84510,"$700,000"
+"617 2nd Ave, Avon By The Sea, NJ 07717",2,1,600,0.04,1428.16,$5.51188,"$325,000"</textarea>
+	    </td>
+	</tr>
+	<tr><td><button type="button" style="margin-left: 0px;margin-right: 5px;vertical-align:middle">Refresh</button>&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="The Refresh button imports the latest data from Zillow.com, performs a multiple regression, and refreshes the model with the new equation." ></span></td></tr>
+      </table>
+      <br>
+    
+    
+  
+ <h4 style="display: inline;vertical-align: middle;">Model Evaluation</h4>&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="This evaluation compares five model predictions with five estimated values from Zillow." ></span>
+ <table>
+    <tr><td colspan="4">Sample Homes:</td></tr>
+    <tr><td>1.</td><td>26 Lincoln Ave, Avon By The Sea, NJ 07717</td><td>$1,538,496</td><td>$1,979,130</td></tr>
+    <tr><td>2.</td><td>27 Garfield Ave, Avon By The Sea, NJ 07717</td><td>$1,323,369</td><td>$1,073,750</td></tr>
+    <tr><td>3.</td><td>207 Garfield Ave, Avon By The Sea, NJ 07717</td><td>$883,916</td><td>$845,807</td></tr>
+    <tr><td>4.</td><td>125 Sylvania Ave, Avon By The Sea, NJ 07717</td><td>$1,080,929</td><td>$950,421</td></tr>
+    <tr><td>5.</td><td>405 Sylvania Ave, Avon By The Sea, NJ 07717</td><td>$753,582</td><td>$777,778</td></tr>  
+ </table>
+ <div id="eval_chart" style="width:700px"></div>
+    
+    
+      
+      
+    </div>
+    
+    
+    
+    
+    <div id="menu2" class="tab-pane fade"  >
+      <h3>Map</h3>
+<br>
+
+    <table  >
+	<tr>
+	    <td>
+	    Enter an address: 
+	    </td>
+	    <td>
+	    <input type="text" class="form-control" id="address" value="106 Sylvania Ave, Avon-by-the-Sea, NJ 07717" style="width: 380px;" >
+	    </td>
+	    <td colspan="4">
+	    <button onclick="codeAddress()" >Map It</button>&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="Enter a valid address (number, street, city, state, zip code)." ></span>
+	    </td>
+	</tr>
+	<tr>
+	<td colspan="5"  >
+	    <div id="map-canvas"></div>
+	</td>
+	<td>
+	    <span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="This is a Google API Map Plugin. It is a lightweight version of Google Maps." ></span>
+	</td>
+	</tr>
+    </table>      
+      
+      
+      
+    </div>
+    
+    <div id="menu3" class="tab-pane fade">
+      <h3>Financing</h3>
+      <p>The information below provides current financial information for the home purchase process.</p>
+      <hr>
+      <h4 style="display: inline">Mortgage Calculator</h4>&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="This simple mortgage calculator calculates your monthly mortgage payment. Answer the questions below and click Calculate." ></span><br>
+      
+   
+      <p style="display:inline;font-size:30px;" >Your monthly payment: &nbsp;&nbsp;</p><p style="display:inline;font-size:30px;" id="monthlypayment" >?</p><br>
+      <table>
+	<tr>
+	    <td style="text-align:left">
+		How much money will you borrow?
+	    </td>
+	    <td>
+		<input type="number" min="1" id="loanamount" value="215000" style="width:100px;" >&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="Enter the total amount of the loan in US Dollars." ></span>
+	    </td>
+	</tr>
+	<tr>
+	    <td style="text-align:left">
+		What is the term of the mortgage (in years)?
+	    </td>
+	    <td>
+		<input type="number" min="1" id="term" value="30" style="width:100px;" >&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="Enter the term of the mortgage in total years." ></span>
+	    </td>
+	</tr>
+	<tr>
+	    <td style="text-align:left">
+		What is the interest rate of the mortgage?
+	    </td>
+	    <td>
+		<input type="number" min="1" id="rate" value="5.25" style="width:100px;" >&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="Enter the interest rate of the mortgage (e.g. 5.25 is 5 1/4 percent)." ></span>
+	    </td>
+	</tr>
+	<tr>
+	    <td colspan="2">
+		<button onclick="calculateMortgage()" >Calculate</button>&nbsp;&nbsp;<button onclick="clearMortgage()" >Reset</button>
+	    </td>
+	</tr>
+      </table>
+      
+      
+      
+<hr>	
+<h4 style="display: inline">Current Mortgage Interest Rates</h4>&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="This table shows the current mortgage interest rates. This is real-time information from Bankrate.com." ></span><br>
+     
+      <p style="font-size:10px;font-style: italic; " >Retrieved from <a href="http://www.bankrate.com/" target="_blank">Bankrate</a></p>
+      <!-- Start bankrate.com code -->
+<table class="exptbl tdWhite"><thead><tr class="scdheader"><th class="cola">3-month trend</th><th class="colb">30-year fixed</th><th class="colc">15-year fixed</th><th class="cold">5/1 ARM</th><th class="cole">30-year jumbo</th></tr></thead><tbody><tr><td class="cola">10/28/2015</td><td class="colb">3.88</td><td class="colc">3.13</td><td class="cold">3.17</td><td class="cole">3.84</td></tr><tr><td class="cola">10/21/2015</td><td class="colb">3.93</td><td class="colc">3.11</td><td class="cold">3.18</td><td class="cole">3.87</td></tr><tr><td class="cola">10/14/2015</td><td class="colb">3.93</td><td class="colc">3.14</td><td class="cold">3.18</td><td class="cole">3.88</td></tr><tr><td class="cola">10/7/2015</td><td class="colb">3.95</td><td class="colc">3.15</td><td class="cold">3.17</td><td class="cole">3.9</td></tr><tr><td class="cola">9/30/2015</td><td class="colb">4.01</td><td class="colc">3.18</td><td class="cold">3.19</td><td class="cole">3.87</td></tr><tr><td class="cola">9/23/2015</td><td class="colb">4</td><td class="colc">3.18</td><td class="cold">3.19</td><td class="cole">3.89</td></tr><tr><td class="cola">9/16/2015</td><td class="colb">4.06</td><td class="colc">3.25</td><td class="cold">3.28</td><td class="cole">3.97</td></tr><tr><td class="cola">9/9/2015</td><td class="colb">4.05</td><td class="colc">3.23</td><td class="cold">3.24</td><td class="cole">3.92</td></tr><tr><td class="cola">9/2/2015</td><td class="colb">4.05</td><td class="colc">3.22</td><td class="cold">3.23</td><td class="cole">3.95</td></tr><tr><td class="cola">8/26/2015</td><td class="colb">4.03</td><td class="colc">3.19</td><td class="cold">3.16</td><td class="cole">3.92</td></tr></tbody></table>
+<!-- End bankrate.com code -->
+
+      
+    </div>
+  
+     <div id="menu4" class="tab-pane fade">
+      <h3>Charts</h3>
+      <p>These charts provide more information for buying a home.</p>
+
+     <hr>
+	
+    
+    
+    <table >
+	<tr>
+	    <td>
+		<h4 style="display: inline; vertical-align:middle;">10-Year Historical Home Value</h4>
+	    </td>
+	    <td>
+		&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="This analysis compares the median Zestimate valuation for two homes over the last 10 years. This is known as the Zillow Home Value Index (ZHVI)."></span>
+	    </td>
+	</tr>
+	<tr>
+	    <td style="vertical-align:middle; " >
+		<div class="form-group">
+		  <label for="town1">Select Town 1:</label>
+		  <select class="input-small" id="town1" onchange="setTown1();" >
+		    <option value="0" selected>Avon</option>
+		    <option value="1" >Bradley Beach</option>
+		    <option value="2" >Belmar</option>
+		    <option value="3" >Manasquan</option>
+		    <option value="4" >Point Pleasant</option>
+		    <option value="5" >Long Branch</option>
+		  </select>
+		</div>
+	    </td>
+	    <td style="vertical-align:middle" >
+		<div class="form-group">
+		  <label for="town2">Select Town 2:</label>
+		  <select class="input-small" id="town2" onchange="setTown2();" >
+		    <option value="0" >Avon</option>
+		    <option value="1" >Bradley Beach</option>
+		    <option value="2" >Belmar</option>
+		    <option value="3" >Manasquan</option>
+		    <option value="4" >Point Pleasant</option>
+		    <option  value="5" selected>Long Branch</option>
+		  </select>&nbsp;&nbsp;<span class="glyphicon glyphicon-question-sign" style="white-space:nowrap;vertical-align: middle;" data-toggle="tooltip" title="Select two towns to compare their historical average home sale prices for the last 10 years." ></span>
+		</div>
+	    </td>
+	</tr>
+    </table>
+    
+    <div id="curve_chart" style="width:700px"></div>
+        <p style="font-size:10px;font-style: italic; " >This data comes from Zillow. For more information, see <a href="http://www.zillow.com/wikipages/What's-the-Zillow-Home-Value-Index/" target="_blank">ZHVA</a></p>
+    </div>
+
+  </div>
+
+</div>
+  
+  
+  
+
+    <script type="text/javascript">
+	
+	var alldata = [];
+	alldata[0] = getAvonData();
+	alldata[1] = getBradleyBeachData();
+	alldata[2] = getBelmarData();
+	alldata[3] = getManasquanData();
+	alldata[4] = getPointPleasantData();
+	alldata[5] = getLongBranchData();
+	    
+      google.setOnLoadCallback(initCharts);
+    var data1 = getAvonData();
+    var data2 = getLongBranchData();
+	
+	function initCharts() {
+	    drawChart();
+	    drawEvalChart();
+	}
+	
+      function drawChart() {
+	
+	var saledata = [];
+	var tempdata = [];
+
+	for (i = 0; i < 11; i++) {
+	    saledata[i] = [];
+	    saledata[i][0] = data1[i][0];
+	    saledata[i][1] = data1[i][1];
+	    saledata[i][2] = data2[i][1];
+	}
+
+	var data = google.visualization.arrayToDataTable(saledata);
+        var options = {
+          title: 'Average Home Sale Prices (x $1,000)',
+          curveType: 'function',
+	  width:600,
+	  height:300,
+	  hAxis: { format:'####'},
+          legend: { position: 'bottom' , maxLines: 2, textStyle: {color: 'blue', fontSize: 12}}
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+        chart.draw(data, options);
+      }
+      
+      function setTown1() {
+	data1 = alldata[document.getElementById("town1").value];
+	drawChart();
+      }
+    function setTown2() {
+	data2 = alldata[document.getElementById("town2").value];
+	drawChart();
+      }
+      
+      function getAvonData() {
+	var data =
+	[
+	['Year','Avon'],
+	[2006,922],
+	[2007,893],
+	[2008,848],	    
+	[2009,848],
+	[2010,774],
+	[2011,795],
+	[2012,771],
+	[2013,772],
+	[2014,819],
+	[2015,822]
+	];
+	return data;
+      }
+      function getBradleyBeachData() {
+	var data = [
+	['Year','Bradley Beach'],
+	[2006,557],
+	[2007,552],
+	[2008,514],	    
+	[2009,497],
+	[2010,484],
+	[2011,476],
+	[2012,466],
+	[2013,452],
+	[2014,466],
+	[2015,501]
+	];
+	return data;
+      }
+      function getBelmarData() {
+	var data = [
+	['Year','Belmar'],
+	[2006,473],
+	[2007,469],
+	[2008,453],	    
+	[2009,433],
+	[2010,427],
+	[2011,423],
+	[2012,404],
+	[2013,395],
+	[2014,417],
+	[2015,464]
+	];
+	return data;
+      }
+      function getManasquanData() {
+	var data = [
+	['Year','Manasquan'],
+	[2006,658],
+	[2007,638],
+	[2008,628],	    
+	[2009,583],
+	[2010,569],
+	[2011,554],
+	[2012,518],
+	[2013,513],
+	[2014,514],
+	[2015,553]
+	];
+	return data;
+      }
+      function getLongBranchData() {
+	var data = [
+	['Year','Long Branch'],
+	[2006,405],
+	[2007,402],
+	[2008,388],	    
+	[2009,358],
+	[2010,338],
+	[2011,314],
+	[2012,296],
+	[2013,295],
+	[2014,302],
+	[2015,324]
+	];
+	return data;
+      }
+      function getPointPleasantData() {
+	var data = [
+	['Year','Point Pleasant'],
+	[2006,396],
+	[2007,384],
+	[2008,374],	    
+	[2009,346],
+	[2010,345],
+	[2011,329],
+	[2012,308],
+	[2013,307],
+	[2014,321],
+	[2015,323]
+	];
+	return data;
+      }
+      
+      
+    function drawEvalChart() {
+	
+	var edata = [
+	    ['Sample','Zestimate','Prediction'],
+	    [1,1538496,1979130],
+	    [2,1323369,1073750],
+	    [3,883916,845807],
+	    [4,1080929,950421],
+	    [5,753582,777778]
+	];
+
+	var edata = google.visualization.arrayToDataTable(edata);
+        var eoptions = {
+          title: 'Prediction vs. Zestimate',
+          curveType: 'function',
+	  width:600,
+	  height:300,
+	  hAxis: { format:'####'},
+          legend: { position: 'bottom' , maxLines: 2, textStyle: {color: 'blue', fontSize: 12}}
+        };
+        var echart = new google.visualization.LineChart(document.getElementById('eval_chart'));
+        echart.draw(edata, eoptions);
+      }
+      
+    </script>
+
+<script>
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+    
+
+    $('.nav-tabs a').on('show.bs.tab', function(){
+        //The new tab is about to be shown
+    });
+    $('.nav-tabs a').on('shown.bs.tab', function(){
+        //The new tab is now fully shown
+	initialize();
+	codeAddress();
+	drawChart(); //since tab isn't shown initially, gotta draw the chart after it is shown.
+	drawEvalChart();
+    });
+    $('.nav-tabs a').on('hide.bs.tab', function(e){
+        //The previous tab is about to be hidden
+    });
+    $('.nav-tabs a').on('hidden.bs.tab', function(){
+        //The previous tab is now fully hidden
+    });   
+    
+});
+calculateSalesPrice();
+calculateMortgage();
+</script>
+
+
+    </body>
+
+
+
+</html>
