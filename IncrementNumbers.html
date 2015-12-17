@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    	<title>Just One More - Edwin Torres</title>
+    	<meta charset="utf-8">
+    	
+    	<script>
+    	
+    	function calc() {
+	    	$('#output').text('');
+    		str = $('#txtinput').val();
+    		result = '';
+    		if (str && str.trim().length > 0) {
+    			//got some input
+    			elems = str.split(",");
+    			for (var i = 0; i < elems.length; i++) {
+    				str2 = elems[i].trim();
+    				result = result + processStr(str2);
+    				if (i < elems.length - 1)
+    					result = result + ' , ';
+				}
+				$('#output').text(result);
+    		} 
+    	}
+    	
+    	function processStr(s) {
+    		if (s && s.trim().length > 0) {
+    			s = s.trim();
+    			tempstr = '';
+    			numstr = '';
+    			for (var j=0; j < s.length; j++) {
+    				asciiCode = s[j].charCodeAt(0);
+    				if (asciiCode >= 48 && asciiCode <= 57) {
+    					//a number
+    					numstr = numstr + s[j];
+    				} else {
+    					//not a number
+    					if (numstr.length > 0) {
+    						num1 = Number(numstr);
+    						num1 = num1 + 1;
+    						tempstr = tempstr + num1;
+    						numstr = '';
+    					}
+    					tempstr = tempstr + s[j];
+    				}
+    			}
+    			if (numstr.length > 0) {
+    				num1 = Number(numstr);
+    				num1 = num1 + 1;
+    				tempstr = tempstr + num1;
+    			}
+    			return tempstr;
+    		} else {
+    			return "";
+    		}
+    	}
+    	
+		</script>
+	</head>
+	
+  <body>
+  	<h2 style="display:inline;">CodeNewbie Challenge: Just One More</h2><br>
+  	<a href="http://www.codenewbie.org/blogs/just-one-more" target="_new">http://www.codenewbie.org/blogs/just-one-more</a>
+  	
+	<table>
+    	<tr>
+    		<td colspan="2"><h2>Level 3</h2></td>
+    	</tr>
+    	<tr>
+    		<td colspan="2">Enter strings separated by a comma:</td>
+    	</tr>    	
+    	<tr>
+    		<td><input type="text" id="txtinput" size="35" value=" ab123 , gh00 , ijk8 , lmn12 , cd99ef11 "></td>
+    		<td><button onclick="calc()">Increment</button></td>
+    	</tr>
+    	<tr>
+    		<td colspan="2">&nbsp;</td>
+    	</tr> 
+    	<tr>
+    		<td colspan="2">Result:</td>
+    	</tr>  
+    	<tr>
+    		<td colspan="2">
+    			<p id="output" style="color:blue;display:inline;"></p>
+    		</td>
+    	</tr>
+    </table>
+    
+    
+  </body>
+</html>
