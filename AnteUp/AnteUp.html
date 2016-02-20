@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ante Up</title>
+
+<style>
+	textarea,th
+	{
+		font-size:24px;
+	}
+	button
+	{
+		font-size:20px;
+	}
+</style>
+
+</head>
+
+<script>
+
+function clearAll() {
+    document.getElementById("winners").value = "";
+    document.getElementById("msg").innerHTML = "";
+    document.getElementById("hands").value = "";
+}
+
+function sampleHands() {
+    clearAll();
+    document.getElementById("hands").value = "Ah 2s 3c 4d 5s\nKh Ks Kc Kd 2h\n8c 7s Ts Jd Qc";
+}
+
+function calculateWinners() {
+    document.getElementById("winners").value = "";
+    document.getElementById("msg").innerHTML = "";
+    inputhands = document.getElementById("hands").value.trim();
+    
+    if (inputhands.length == 0) {
+        document.getElementById("msg").style.color = "red";
+        document.getElementById("msg").innerHTML = "please enter at least one hand (e.g. As 2h Qc 4d 5h )";
+        return;
+    }
+    
+    hands = inputhands.split(/[\n]+/);
+    strnew = "";
+    for (ih = 0; ih < hands.length; ih++) {
+    
+    	strnewhand = "";
+    	cards2 = hands[ih].split(/[\s]+/);
+        for (c2 = 0; c2 < cards2.length; c2++) {
+        	strnewhand = strnewhand + cards2[c2].charAt(0).toUpperCase() + cards2[c2].charAt(1).toLowerCase();
+        	if (c2 < cards2.length-1)
+        		strnewhand += " ";
+        }
+    
+        strnew = strnew + strnewhand.trim();
+        if (ih < hands.length-1)
+            strnew += "\n";
+    }
+    
+    document.getElementById("hands").value = strnew;
+    inputhands = document.getElementById("hands").value.trim();
+    hands = inputhands.split(/[\n]+/);
+    if (!validateHands(hands))
+    	return;
+
+    maxval = 0;
+    for (h = 0; h < hands.length; h++) { 
+        currval = getPokerHand(hands[h])[1];
+        if (currval > maxval)
+            maxval = currval; 
+    }
+    winners = "";
+    for (h = 0; h < hands.length; h++) { 
+        pokerhand = getPokerHand(hands[h]);
+        if (pokerhand[1] >= maxval) {
+            winners = winners + pokerhand[0] + "\n";
+        } else {
+            winners += "\n";
+        }
+    }
+    document.getElementById("winners").value = winners;
+}    
+    
+function validateHands(arr) {
+
+    if (arr === undefined || arr === null) {
+        return false;
+    }
+    
+    cardsSeen = "|";
+    for (h1 = 0; h1 < arr.length; h1++) { 
+        hnd1 = getHand(arr[h1]);
+        
+        if (hnd1.length != 5) {
+        	document.getElementById("msg").style.color = "red";
+        	document.getElementById("msg").innerHTML = "error: a hand must have exactly five cards";
+            return false;
+        }
+        
+        for (h2 = 0; h2 < hnd1.length; h2++) {
+        
+            //check validity
+            if (!validCard(hnd1[h2])) {
+            	document.getElementById("msg").style.color = "red";
+        		document.getElementById("msg").innerHTML = "error: invalid card detected";
+                return false;
+            }    
+                
+            //check for dups
+            if (cardsSeen.indexOf(hnd1[h2]) != -1) {
+                document.getElementById("msg").style.color = "red";
+        		document.getElementById("msg").innerHTML = "error: duplicate card detected";
+                return false;
+            }    
+                
+            cardsSeen = cardsSeen + hnd1[h2] + "|";
+        }
+    }    
+    return true;
+}
+
+//returns array of: [ hand string, numerical value ]
+function getPokerHand(hand) {
+    if (hand === undefined || hand === null) {
+        return [ "", 0];
+    }
+    
+    result = [ "" , 0 ];
+    
+    //check if straight flush
+    if (isStraight(hand) && isFlush(hand)) {
+        result[0] = "Straight Flush";
+        result[1] = 9 + getStraightHighCardValue(hand)/100;
+    } else if (isFourOfAKind(hand)) {
+        result[0] = "Four of a Kind";
+        result[1] = 8 + getFourOfAKindValue(hand)/100;
+    } else if (isFullHouse(hand)) {
+        result[0] = "Full House";    
+        result[1] = 7 + getFullHouseValue(hand)/100;
+    } else if (isFlush(hand)) {
+        result[0] = "Flush";   
+        result[1] = 6 + getHighCardValue(hand)/100;
+    } else if (isStraight(hand)) {
+        result[0] = "Straight";   
+        result[1] = 5 + getStraightHighCardValue(hand)/100;
+    } else if (isThreeOfAKind(hand)) {
+        result[0] = "Three of a Kind";  
+        result[1] = 4 + getThreeOfAKindValue(hand)/100;
+    } else if (isTwoPair(hand)) {
+        result[0] = "Two Pair";   
+        result[1] = 3 + getTwoPairValue(hand)/100;
+    } else if (isOnePair(hand)) {
+        result[0] = "One Pair";
+        result[1] = 2 + getOnePairValue(hand)/100;
+    } else {
+        result[0] = "High Card";  
+        result[1] = 1 + getHighCardValue(hand)/100; 
+    }
+    return result;
+}
+
+//get high card value from a group of cards
+function getHighCardValue(cards) {
+    if (cards === undefined || cards === null) {
+        return "";
+    }
+    arr = getHand(cards);
+    arrHighA = [];
+    for (i = 0; i < arr.length; i++) { 
+        arrHighA.push(getCardValHighAce(arr[i]));
+    }    
+    arrHighA = arrHighA.sort(function(a,b){return a-b});
+    
+    sum = 0;
+    pwr = 0;
+    for (i = arrHighA.length-1; i >= 0; i--) { 
+        sum += arrHighA[i] / (Math.pow(10,pwr));
+        pwr++;
+    }        
+    return sum;
+}
+
+//get hand
+function getHand(str) {
+    if (str === undefined || str === null) {
+        return [];
+    }
+    arr = str.split(/[\s]+/);
+    return arr;
+}
+
+function isFourOfAKind(hand) {
+    if (hand === undefined || hand === null) {
+        return false;
+    }
+    counts =  getMatchingValueCards(hand);
+    if (Math.max.apply(Math, counts) == 4)
+        return true;
+    return false;
+}
+
+function isThreeOfAKind(hand) {
+    if (hand === undefined || hand === null) {
+        return false;
+    }
+    counts =  getMatchingValueCards(hand);
+    if (Math.max.apply(Math, counts) != 3)
+        return false;
+    
+    //there must not also be a pair
+    if (counts.indexOf(2) != -1)
+        return false;
+    
+    return true;
+}
+
+function isTwoPair(hand) {
+    if (hand === undefined || hand === null) {
+        return false;
+    }
+    counts =  getMatchingValueCards(hand);
+    if (Math.max.apply(Math, counts) != 2)
+        return false;
+    
+    //there must be two occurrences of the count 2
+    occurrences = counts.reduce(function(n, val) {return n + (val === 2);}, 0);
+    if (occurrences == 2)
+        return true;
+    return false;
+}
+
+function isOnePair(hand) {
+    if (hand === undefined || hand === null) {
+        return false;
+    }
+    counts =  getMatchingValueCards(hand);
+    if (Math.max.apply(Math, counts) != 2)
+        return false;
+    
+    //there must be 1 occurrence of the count 2
+    occurrences = counts.reduce(function(n, val) {return n + (val === 2);}, 0);
+    if (occurrences == 1)
+        return true;
+    return false;
+}
+
+function isFullHouse(hand) {
+    if (hand === undefined || hand === null) {
+        return false;
+    }
+    counts =  getMatchingValueCards(hand);
+    if (Math.max.apply(Math, counts) != 3)
+        return false;
+        
+    //there must also be a pair
+    if (counts.indexOf(2) == -1)
+        return false;
+        
+    return true;
+}
+
+//returns an array of counts. pos 0 and 1 are unused. pos 14 is Ace
+function getMatchingValueCards(hand) {
+    counts = [ 0, 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ];
+    if (hand === undefined || hand === null) {
+        return counts;
+    }
+    arr = getHand(hand);
+    
+    //get the values
+    arrVals = [];
+    for (i = 0; i < arr.length; i++) { 
+        arrVals.push(getCardValHighAce(arr[i]));
+    }
+    arrVals = arrVals.sort(function(a,b){return a-b});
+    for (i = 0; i < arrVals.length; i++) { 
+        counts[arrVals[i]] = counts[arrVals[i]] + 1;
+    }    
+    return counts;
+}
+
+//check if hand is a straight
+function isStraight(hand) {
+    if (hand === undefined || hand === null) {
+        return false;
+    }
+    arr = getHand(hand);
+    
+    //look for both ace high straight and ace low straight
+    arrHighA = [];
+    arrLowA = [];
+    for (i = 0; i < arr.length; i++) { 
+        arrHighA.push(getCardValHighAce(arr[i]));
+        arrLowA.push(getCardValLowAce(arr[i]));
+    }
+    
+    arrHighA = arrHighA.sort(function(a,b){return a-b});
+    arrLowA = arrLowA.sort(function(a,b){return a-b});
+
+    //is it a straight with A being the highest card (if any)
+    aceHighStraight = true;
+    for (i = 0; i < arrHighA.length-1; i++) { 
+        if ((arrHighA[i+1] - arrHighA[i]) != 1) {
+            aceHighStraight = false;
+            break;
+        }
+    }
+    if (aceHighStraight)
+        return true;
+        
+    //is it a straight with A being the lowest card (if any)
+    aceLowStraight = true;
+    for (i = 0; i < arrLowA.length-1; i++) { 
+        if ((arrLowA[i+1] - arrLowA[i]) != 1) {
+            aceLowStraight = false;
+            break;
+        }
+    }
+    if (aceLowStraight)
+        return true;
+        
+    return false;
+}
+
+//get four of a kind value
+function getFourOfAKindValue(hand) {
+    if (!isFourOfAKind(hand)) {
+        return 0;
+    }
+    
+    //Get index
+    idx = counts.indexOf(4); //2-14
+    return idx;
+}
+
+//get one pair value
+function getOnePairValue(hand) {
+    if (!isOnePair(hand)) {
+        return 0;
+    }
+    
+    //Get index
+    idx = counts.indexOf(2); //2-14
+    idx += getHighCardValue(hand)/100;
+    return idx;
+}
+
+//get three of a kind value
+function getThreeOfAKindValue(hand) {
+    if (!isThreeOfAKind(hand)) {
+        return 0;
+    }
+    counts =  getMatchingValueCards(hand);
+   
+    //Get index
+    idx = counts.indexOf(3); //2-14
+    return idx;
+}
+
+//get three of a kind value
+function getTwoPairValue(hand) {
+    if (!isTwoPair(hand)) {
+        return 0;
+    }
+    counts =  getMatchingValueCards(hand);
+   
+    //Get index
+    idx = counts.indexOf(2,0); //2-14
+    idx2 = counts.indexOf(2,idx+1);
+    
+    if (idx > idx2) {
+        return idx + idx2/100;
+    } else {
+        return idx2 + idx/100;
+    }
+}
+
+//get full house value
+function getFullHouseValue(hand) {
+    if (!isFullHouse(hand)) {
+        return 0;
+    }
+    counts =  getMatchingValueCards(hand);
+    
+    //Get index of trips
+    idx1 = counts.indexOf(3);
+    
+    //get index of pair
+    idx2 = counts.indexOf(2);
+    
+    return idx1 + idx2/100;
+}
+
+//get the high card of the straight
+function getStraightHighCardValue(hand) {
+    if (hand === undefined || hand === null) {
+        return 0;
+    }
+    arr = getHand(hand);
+    
+    //look for both ace high straight and ace low straight
+    arrHighA = [];
+    arrLowA = [];
+    for (i = 0; i < arr.length; i++) { 
+        arrHighA.push(getCardValHighAce(arr[i]));
+        arrLowA.push(getCardValLowAce(arr[i]));
+    }
+    
+    arrHighA = arrHighA.sort(function(a,b){return a-b});
+    arrLowA = arrLowA.sort(function(a,b){return a-b});
+
+    //is it a straight with A being the highest card (if any)
+    aceHighStraight = true;
+    for (i = 0; i < arrHighA.length-1; i++) { 
+        if ((arrHighA[i+1] - arrHighA[i]) != 1) {
+            aceHighStraight = false;
+            break;
+        }
+    }
+    if (aceHighStraight) {
+        return arrHighA[arrHighA.length-1];
+    }
+        
+    //is it a straight with A being the lowest card (if any)
+    aceLowStraight = true;
+    for (i = 0; i < arrLowA.length-1; i++) { 
+        if ((arrLowA[i+1] - arrLowA[i]) != 1) {
+            aceLowStraight = false;
+            break;
+        }
+    }
+    if (aceLowStraight) {
+        return arrLowA[arrLowA.length-1];
+    }
+        
+    return 0;
+}
+
+//check if hand is a flush (same suit)
+function isFlush(hand) {
+    if (hand === undefined || hand === null) {
+        return false;
+    }
+    suits = hand.toUpperCase().replace(/[TJQKA23456789\s]+/g,'');
+    if (suits == "CCCCC" || suits == "HHHHH" || suits == "SSSSS" || suits == "DDDDD")
+        return true;
+    return false;
+}
+
+//check if it is a valid card
+function validCard(str) {
+    if (str === undefined || str === null || str.length != 2) {
+        return false;
+    }
+    str = str.toUpperCase();
+    c1 = str[0];
+    c2 = str[1];
+    if (c1 != '2' && c1 != '3' && c1 != '4' && c1 != '5' && c1 != '6' && c1 != '7' && c1 != '8' && c1 != '9' && c1 != 'T' && c1 != 'J' && c1 != 'Q' && c1 != 'K' && c1 != 'A')
+        return false;
+    if (c2 != 'C' && c2 != 'H' && c2 != 'S' && c2 != 'D')
+        return false;        
+    return true;
+}
+
+//determine numerical value of card with Ace as high value; e.g. 9s = 9
+function getCardValHighAce(str) {
+    if (str === undefined || str === null || str.length != 2) {
+        alert('invalid card: ' + str);
+        return 0;
+    }
+    
+    str = str.toUpperCase();
+    c = str[0];
+    num = 0;
+    switch(c) {
+        case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
+        num = Number(c);
+        break;
+        case 'T': num = 10; break;
+        case 'J': num = 11; break;
+        case 'Q': num = 12; break;
+        case 'K': num = 13; break;
+        case 'A': num = 14; break;
+        default: num = 0; break;
+    }
+    return num;
+}
+
+//determine numerical value of card with Ace as low value; e.g. 9s = 9
+function getCardValLowAce(str) {
+    if (str === undefined || str === null || str.length != 2) {
+        alert('invalid card: ' + str);
+        return 0;
+    }
+    
+    str = str.toUpperCase();
+    c = str[0];
+    num = 0;
+    switch(c) {
+        case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
+        num = Number(c);
+        break;
+        case 'T': num = 10; break;
+        case 'J': num = 11; break;
+        case 'Q': num = 12; break;
+        case 'K': num = 13; break;
+        case 'A': num = 1; break;
+        default: num = 0; break;
+    }
+    return num;
+}
+</script>
+
+	<body>
+		<table>
+			<tr>
+				<th>Hands</th>
+				<th>Winner(s)</th>
+			</tr>
+			<tr>
+				<td>
+					<textarea id="hands" rows="10" cols="15"></textarea>
+				</td>
+				<td>
+					<textarea id="winners" rows="10" cols="15" style="color:blue;font-weight:bold"></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2"><button onclick="calculateWinners(hands);" style="margin:5px">Calculate</button><button onclick="clearAll();">Clear</button>&nbsp;&nbsp;<button onclick="sampleHands();">Sample Hands</button></td>
+			</tr>
+		</table>
+		<p id="msg"></p>
+	</body>
+	
+</html>
