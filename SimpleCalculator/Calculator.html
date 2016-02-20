@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Torres Instruments</title>
+    <style>
+    button {
+        text-align: center;
+        font-size: 18px;
+        margin-right: 10px;
+    }
+    table, th, td {
+        padding: 2px;
+        border: 0px solid black;
+    }
+    input {
+        width: 200px;
+        height: 60px;
+        font-size: 20px;  
+        text-align: right;    
+    }
+    select {
+        height:66px;
+        width:100px;
+        font-size:30px;
+    } 
+    p {
+        font-family: Calibri, Candara, Segoe, 'Segoe UI', Optima, Arial, sans-serif;
+    }
+    </style>
+</head>
+<body>
+
+<script>
+function doClear() {
+    document.getElementById('lhs').value = "";
+    document.getElementById('rhs').value = "";
+    document.getElementById('result').innerHTML = "";
+}
+
+function doCaclulation() {
+    lval = document.getElementById('lhs').value;
+    rval = document.getElementById('rhs').value;
+
+    //default to 0 if nothing entered
+    if (lval.length == 0) {
+        lval = 0;
+        document.getElementById('lhs').value = lval;
+    }
+    if (rval.length == 0) {
+        rval = 0;
+        document.getElementById('rhs').value = rval;
+    }      
+    
+    //do the operation
+    e = document.getElementById("operation");
+    op = e.options[e.selectedIndex].value;
+    
+    if (op == "%" || op == "div") {
+        //change nums to ints
+        lval = Math.floor(lval);
+        document.getElementById('lhs').value = lval;
+        rval = Math.floor(rval);
+        document.getElementById('rhs').value = rval;
+    }
+    
+    if (op == "div") {
+        result = Math.floor(lval/rval);
+    } else if (op == "**") {
+        result = Math.pow(lval,rval);
+    } else {
+        result = eval(lval + ' ' + op + ' ' + rval);
+    }
+    
+    if (isNaN(result))
+        result = "invalid operation";
+    
+    document.getElementById('result').innerHTML = result;
+}
+
+//function to prevent bad input for the numbers
+function processKey(e,str) {
+    document.getElementById('msg').innerHTML = "";
+    var event = e || window.event;
+    var charCode = event.which || event.keyCode;
+
+    //acceptable chars: 0-9, -, +, .
+    if (charCode != 45 && charCode != 46 && charCode != 13 && (charCode < 48 || charCode > 57))
+        return false;
+    
+    currval = document.getElementById(str).value;
+
+    //prevent more than one decimal point
+    if (charCode == 46) {
+        if (currval.indexOf('.') != -1) {
+            return false;
+        } else {
+            if (currval.length == 0) {
+                //prefix with a leading 0
+                document.getElementById(str).value = 0;
+            } else if (currval.length == 1 && currval == "-") {
+                //prefix with a leading 0
+                document.getElementById(str).value = '-0';
+            }
+        }
+    } else if (charCode == 45) {
+        //prevent more than one minus sign
+        if (currval.indexOf('-') != -1) {
+            return false;
+        } else {
+            if (currval.length > 0) {
+                //minus sign may only be at the beginning
+                document.getElementById(str).value = '-' + document.getElementById(str).value;
+                return false;
+            }
+        }
+    } else if ( charCode == '13' ) {
+        //Enter key?
+        doCaclulation();
+        return false;
+    }
+    
+    return true;
+}
+
+function parseField(obj) {
+    if (obj.value == "" || obj.value == "-" || obj.value == ".")
+        obj.value = 0;
+    val = parseFloat(obj.value);
+    obj.value = val;
+    doCaclulation();
+}
+</script>
+
+<table>
+    <tr>
+        <td><input id="lhs" onblur="parseField(this)"></td>
+        <td>
+            <select id="operation" onblur="doCaclulation()" onchange="doCaclulation()">
+                <option value="*">&times;</option>
+                <option value="/">&divide;</option>
+                <option value="+">+</option>
+                <option value="-">-</option>
+                <option value="div">div</option>
+                <option value="%">mod</option>
+                <option value="**">**</option>
+            </select>    
+        </td>		
+        <td><input id="rhs" onblur="parseField(this)"></td>
+        <td><p style="color:black;font-size:30px;font-weight:bold">&nbsp;=&nbsp;</p></td>
+        <td><p id="result" style="color:black;font-size:30px;"></p></td>
+  </tr> 
+  <tr>
+        <td colspan="5">
+            <button onclick="doCaclulation()">Calculate</button>
+            <button onclick="doClear()">Clear</button>
+            <p id="msg" style="color:blue;font-size:40px;">Hi there!</p>
+        </td>
+  </tr>
+</table>
+
+<script>
+    document.getElementById('lhs').onkeypress = function(e) {
+        return processKey(e,'lhs');
+    }
+    document.getElementById('rhs').onkeypress = function(e) {
+        return processKey(e,'rhs');
+    }
+</script>
+
+</body>
+</html>
