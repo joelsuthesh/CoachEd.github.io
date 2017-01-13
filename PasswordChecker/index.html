@@ -3,16 +3,30 @@
 
 <head>
 <title>Password Checker</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 
 <body>
-
-Password: <input type="password" id="password">&nbsp;<button onclick="validatePassword()">Check</button>
 <br>
+<div class="form-group">
+  <label for="pwd">Password:</label>
+  <input type="password" id="password">
+  <button onclick="validatePassword()">Check</button>
+</div>
+
+<div id="alertarea">
+</div>
+
 <textarea readonly id="msg" rows="10" cols="80" style="border: none">
 </textarea>
 
 <script>
+
+$('#erroralert').hide();
 function validatePassword() {
     errors = [];
     var p = document.getElementById("password").value;
@@ -57,17 +71,31 @@ function validatePassword() {
         }    
     }
     
-    if (score >= 2) {
-        document.getElementById("msg").value ="Valid!";
+    if (score >= 2) {	
+		var str = '<div class="alert alert-success alert-dismissable">';
+        str += '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>';
+        str += '<strong>Success!</strong></div>';
+		document.getElementById("alertarea").innerHTML = str;
+		$('#erroralert').show();		
     } else {
-        var str ="* INVALID *\n";
-        str += errors.join("\n");
-        str +="\n\n";
-        str +="The password must match at least two of these rules:\n";
-        str +="1. Contains both uppercase and lowercase letters\n";
-        str +="2. Contains numbers\n";
-        str +="3. Contains symbols\n";
-        document.getElementById("msg").value = str;
+		
+		var str = '<div class="alert alert-danger alert-dismissable" id="erroralert" >';
+        str += '<a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>';
+        str += '<strong>Error!</strong><br>';
+		
+		for (i = 0; i < errors.length; i++) {
+		    str += errors[i] + '<br>';
+		}
+		
+		str += '<br>'; 
+        str +="The password must match at least two of these rules:<br>";
+        str +="1. Contains both uppercase and lowercase letters<br>";
+        str +="2. Contains numbers<br>";
+        str +="3. Contains symbols<br>";		
+		str += '</div>';
+
+		document.getElementById("alertarea").innerHTML = str;
+		$('#erroralert').show();
     }
     return true;
 }
