@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Password Checker</title>
+</head>
+
+<body>
+
+Password: <input type="password" id="password">&nbsp;<button onclick="validatePassword()">Check</button>
+<br>
+<textarea readonly id="msg" rows="10" cols="80" style="border: none">
+</textarea>
+
+<script>
+function validatePassword() {
+    errors = [];
+    var p = document.getElementById("password").value;
+    var score = 0;
+    if (p.length < 10) {
+        errors.push("Your password must be at least 10 characters long."); 
+        score = -1;
+    } else {
+    
+    
+        var found = 0;
+        var word = "";
+        for (i = 0; i < cw.length; i++) { 
+            if (p.indexOf(cw[i]) != -1) {
+                word = cw[i];
+                found = 1;
+                break;
+            }
+        }
+        if (found == 1) {
+            errors.push("Your password must not contain common English words: " + word); 
+            score = -1;
+        } else {
+            var score = 0;
+            if (p.search(/[a-z]/) >= 0 && p.search(/[A-Z]/) >= 0) {
+                score += 1;
+            } else {
+                errors.push("Does not have both upper and lower case chars."); 
+            }
+        
+            if (p.search(/[0-9]/) >= 0) {
+                score += 1; 
+            } else {
+                errors.push("No digits."); 
+            }
+            
+            if (p.search(/[-!$%^&*()_+|~=`{}\[\]:";'<>?,.\/]/) >= 0) {
+                score += 1; 
+            } else {
+                errors.push("No special characters."); 
+            }        
+        }    
+    }
+    
+    if (score >= 2) {
+        document.getElementById("msg").value ="Valid!";
+    } else {
+        var str ="* INVALID *\n";
+        str += errors.join("\n");
+        str +="\n\n";
+        str +="The password must match at least two of these rules:\n";
+        str +="1. Contains both uppercase and lowercase letters\n";
+        str +="2. Contains numbers\n";
+        str +="3. Contains symbols\n";
+        document.getElementById("msg").value = str;
+    }
+    return true;
+}
+
+var cw = [];
+cw.push("the");
+cw.push("be");
+cw.push("to");
+cw.push("of");
+cw.push("and");
+cw.push("a");
+cw.push("in");
+cw.push("that");
+cw.push("have");
+cw.push("I");
+cw.push("it");
+cw.push("for");
+cw.push("not");
+cw.push("on");
+cw.push("with");
+cw.push("he");
+cw.push("as");
+cw.push("you");
+cw.push("do");
+cw.push("at");
+cw.push("this");
+cw.push("but");
+cw.push("his");
+cw.push("by");
+cw.push("from");
+cw.push("they");
+cw.push("we");
+cw.push("say");
+cw.push("her");
+cw.push("she");
+cw.push("or");
+cw.push("an");
+cw.push("will");
+cw.push("my");
+cw.push("one");
+cw.push("all");
+cw.push("would");
+cw.push("there");
+cw.push("their");
+cw.push("what");
+cw.push("so");
+cw.push("up");
+cw.push("out");
+cw.push("if");
+cw.push("about");
+cw.push("who");
+cw.push("get");
+cw.push("which");
+cw.push("go");
+cw.push("me");
+cw.push("when");
+cw.push("make");
+cw.push("can");
+cw.push("like");
+cw.push("time");
+cw.push("no");
+cw.push("just");
+cw.push("him");
+cw.push("know");
+cw.push("take");
+cw.push("people");
+cw.push("into");
+cw.push("year");
+cw.push("your");
+cw.push("good");
+cw.push("some");
+cw.push("could");
+cw.push("them");
+cw.push("see");
+cw.push("other");
+cw.push("than");
+cw.push("then");
+cw.push("now");
+cw.push("look");
+cw.push("only");
+cw.push("come");
+cw.push("its");
+cw.push("over");
+cw.push("think");
+cw.push("also");
+cw.push("back");
+cw.push("after");
+cw.push("use");
+cw.push("two");
+cw.push("how");
+cw.push("our");
+cw.push("work");
+cw.push("first");
+cw.push("well");
+cw.push("way");
+cw.push("even");
+cw.push("new");
+cw.push("want");
+cw.push("because");
+cw.push("any");
+cw.push("these");
+cw.push("give");
+cw.push("day");
+cw.push("most");
+cw.push("us");
+
+</script>
+
+</body>
+</html>
